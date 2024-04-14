@@ -17,7 +17,7 @@ func testShortenJumps(t *testing.T, before, after []opcode.Opcode, indices []int
 	for i := range raw {
 		actual[i] = opcode.Opcode(raw[i])
 	}
-	require.Equal(t, spAfter, spBefore);
+	require.Equal(t, spAfter, spBefore)
 	require.Equal(t, after, actual)
 }
 
@@ -46,18 +46,18 @@ func TestShortenJumps(t *testing.T) {
 				op, 3, 12, 0, 0, opcode.PUSH1, opcode.NOP,
 				sop, 249, sop, 0xFF - 2,
 			}
-			spBefore := map[string][]DebugSeqPoint {
-				"test" : {
-					DebugSeqPoint{ Opcode: 0 }, DebugSeqPoint{ Opcode: 5 }, 
-					DebugSeqPoint{ Opcode: 7 }, DebugSeqPoint{ Opcode: 12 },
-					DebugSeqPoint{ Opcode: 14 }, DebugSeqPoint{ Opcode: 19 },
+			spBefore := map[string][]DebugSeqPoint{
+				"test": {
+					DebugSeqPoint{Opcode: 0}, DebugSeqPoint{Opcode: 5},
+					DebugSeqPoint{Opcode: 7}, DebugSeqPoint{Opcode: 12},
+					DebugSeqPoint{Opcode: 14}, DebugSeqPoint{Opcode: 19},
 				},
 			}
-			spAfter := map[string][]DebugSeqPoint {
-				"test" : {
-					DebugSeqPoint{ Opcode: 0 }, DebugSeqPoint{ Opcode: 2 }, 
-					DebugSeqPoint{ Opcode: 4 }, DebugSeqPoint{ Opcode: 9 },
-					DebugSeqPoint{ Opcode: 11 }, DebugSeqPoint{ Opcode: 13 },
+			spAfter := map[string][]DebugSeqPoint{
+				"test": {
+					DebugSeqPoint{Opcode: 0}, DebugSeqPoint{Opcode: 2},
+					DebugSeqPoint{Opcode: 4}, DebugSeqPoint{Opcode: 9},
+					DebugSeqPoint{Opcode: 11}, DebugSeqPoint{Opcode: 13},
 				},
 			}
 			testShortenJumps(t, before, after, []int{2, 3, 4, 16, 17, 18, 21, 22, 23}, spBefore, spAfter)
@@ -84,16 +84,16 @@ func TestShortenJumps(t *testing.T) {
 				opcode.JMP, 2,
 				opcode.JMP, 2,
 			}
-			spBefore := map[string][]DebugSeqPoint {
-				"test" : {
-					DebugSeqPoint{ Opcode: 0 },
-					DebugSeqPoint{ Opcode: 5 },
+			spBefore := map[string][]DebugSeqPoint{
+				"test": {
+					DebugSeqPoint{Opcode: 0},
+					DebugSeqPoint{Opcode: 5},
 				},
 			}
-			spAfter := map[string][]DebugSeqPoint {
-				"test" : {
-					DebugSeqPoint{ Opcode: 0 },
-					DebugSeqPoint{ Opcode: 2 },
+			spAfter := map[string][]DebugSeqPoint{
+				"test": {
+					DebugSeqPoint{Opcode: 0},
+					DebugSeqPoint{Opcode: 2},
 				},
 			}
 			testShortenJumps(t, before, after, []int{2, 3, 4, 7, 8, 9}, spBefore, spAfter)
@@ -109,18 +109,18 @@ func TestShortenJumps(t *testing.T) {
 				opcode.JMP, 0xFF - 1,
 				opcode.JMP, 0xFF - 1,
 			}
-			spBefore := map[string][]DebugSeqPoint {
-				"test" : {
-					DebugSeqPoint{ Opcode: 0 },
-					DebugSeqPoint{ Opcode: 5 },
-					DebugSeqPoint{ Opcode: 10 },
+			spBefore := map[string][]DebugSeqPoint{
+				"test": {
+					DebugSeqPoint{Opcode: 0},
+					DebugSeqPoint{Opcode: 5},
+					DebugSeqPoint{Opcode: 10},
 				},
 			}
-			spAfter := map[string][]DebugSeqPoint {
-				"test" : {
-					DebugSeqPoint{ Opcode: 0 },
-					DebugSeqPoint{ Opcode: 2 },
-					DebugSeqPoint{ Opcode: 4 },
+			spAfter := map[string][]DebugSeqPoint{
+				"test": {
+					DebugSeqPoint{Opcode: 0},
+					DebugSeqPoint{Opcode: 2},
+					DebugSeqPoint{Opcode: 4},
 				},
 			}
 			testShortenJumps(t, before, after, []int{2, 3, 4, 7, 8, 9, 12, 13, 14}, spBefore, spAfter)
@@ -141,15 +141,15 @@ func TestWriteJumps(t *testing.T) {
 		"main":   {rng: DebugRange{Start: 4, End: 9}},
 		"method": {rng: DebugRange{Start: 10, End: 11}},
 	}
-	c.sequencePoints = map[string][]DebugSeqPoint {
-		"init" : {
-			DebugSeqPoint{ Opcode: 1 }, DebugSeqPoint{ Opcode: 3 },
+	c.sequencePoints = map[string][]DebugSeqPoint{
+		"init": {
+			DebugSeqPoint{Opcode: 1}, DebugSeqPoint{Opcode: 3},
 		},
-		"main" : {
-			DebugSeqPoint{ Opcode: 4 }, DebugSeqPoint{ Opcode: 9 },
+		"main": {
+			DebugSeqPoint{Opcode: 4}, DebugSeqPoint{Opcode: 9},
 		},
-		"method" : {
-			DebugSeqPoint{ Opcode: 10 }, DebugSeqPoint{ Opcode: 11 },
+		"method": {
+			DebugSeqPoint{Opcode: 10}, DebugSeqPoint{Opcode: 11},
 		},
 	}
 
@@ -163,15 +163,15 @@ func TestWriteJumps(t *testing.T) {
 		"main":   {rng: DebugRange{Start: 4, End: 6}},
 		"method": {rng: DebugRange{Start: 7, End: 8}},
 	}
-	expSeqPoints := map[string][]DebugSeqPoint {
-		"init" : {
-			DebugSeqPoint{ Opcode: 1 }, DebugSeqPoint{ Opcode: 3 },
+	expSeqPoints := map[string][]DebugSeqPoint{
+		"init": {
+			DebugSeqPoint{Opcode: 1}, DebugSeqPoint{Opcode: 3},
 		},
-		"main" : {
-			DebugSeqPoint{ Opcode: 4 }, DebugSeqPoint{ Opcode: 6 },
+		"main": {
+			DebugSeqPoint{Opcode: 4}, DebugSeqPoint{Opcode: 6},
 		},
-		"method" : {
-			DebugSeqPoint{ Opcode: 7 }, DebugSeqPoint{ Opcode: 8 },
+		"method": {
+			DebugSeqPoint{Opcode: 7}, DebugSeqPoint{Opcode: 8},
 		},
 	}
 

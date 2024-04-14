@@ -2526,11 +2526,11 @@ func removeNOPs(b []byte, nopOffsets []int, sequencePoints map[string][]DebugSeq
 		for i := range seqPoints {
 			diff := 0
 			for _, offset := range nopOffsets {
-				if (offset < seqPoints[i].Opcode) {
-					diff++;
+				if offset < seqPoints[i].Opcode {
+					diff++
 				}
 			}
-			seqPoints[i].Opcode -= diff;
+			seqPoints[i].Opcode -= diff
 		}
 	}
 

@@ -93,7 +93,7 @@ func TestShortenJumps(t *testing.T) {
 			spAfter := map[string][]DebugSeqPoint {
 				"test" : {
 					DebugSeqPoint{ Opcode: 0 },
-					DebugSeqPoint{ Opcode: 1 },
+					DebugSeqPoint{ Opcode: 2 },
 				},
 			}
 			testShortenJumps(t, before, after, []int{2, 3, 4, 7, 8, 9}, spBefore, spAfter)

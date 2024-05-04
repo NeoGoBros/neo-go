@@ -2,6 +2,9 @@ package neotest
 
 import (
 	"flag"
+	"fmt"
+	"io"
+	"os"
 
 	"github.com/nspcc-dev/neo-go/pkg/compiler"
 	"github.com/nspcc-dev/neo-go/pkg/util"
@@ -48,7 +51,27 @@ func coverageHook() vm.OnExecHook {
 }
 
 func reportCoverage() {
+	f, _ := os.Create("cover.out")
+	fmt.Fprintf(f, "mode: count\n")
+	defer f.Close()
+	writeCoverageReport(f)
+}
 
+func writeCoverageReport(w io.Writer) {
+	cover := processCover()
+	for name, blocks := range cover {
+		for _, b := range blocks {
+			fmt.Fprintf(w, "%s:%d.%d,%d.%d %d %d\n", name,
+				b.startLine, b.endLine,
+				b.endLine, b.endCol,
+				b.stmts,
+				b.counts,
+			)
+		}
+	}
+}
+
+func processCover() map[documentName][]coverBlock {
 	documents := make(map[documentName]struct{})
 	for _, scriptRawCoverage := range rawCoverage {
 		for _, documentName := range scriptRawCoverage.debugInfo.Documents {
@@ -67,11 +90,11 @@ func reportCoverage() {
 			for _, point := range documentSeqPoints {
 				b := coverBlock{
 					startLine: uint(point.StartLine),
-					startCol: uint(point.StartCol),
-					endLine: uint(point.EndLine),
-					endCol: uint(point.EndCol),
-					stmts: 1 + uint(point.EndLine) - uint(point.StartLine),
-					counts: 0,
+					startCol:  uint(point.StartCol),
+					endLine:   uint(point.EndLine),
+					endCol:    uint(point.EndCol),
+					stmts:     1 + uint(point.EndLine) - uint(point.StartLine),
+					counts:    0,
 				}
 				mappedBlocks[point.Opcode] = &b
 			}
@@ -89,23 +112,22 @@ func reportCoverage() {
 				}
 			}
 		}
-		
+
 		var blocks []coverBlock
 		for _, b := range mappedBlocks {
 			blocks = append(blocks, *b)
 		}
 		cover[documentName] = blocks
 	}
-
-	println(cover)
+	return cover
 }
 
 func documentSeqPoints(di *compiler.DebugInfo, doc documentName) []compiler.DebugSeqPoint {
 	var res []compiler.DebugSeqPoint
 	for _, methodDebugInfo := range di.Methods {
 		for _, p := range methodDebugInfo.SeqPoints {
-			if (di.Documents[p.Document] == doc) {
-				res = append(res, p)	
+			if di.Documents[p.Document] == doc {
+				res = append(res, p)
 			}
 		}
 	}

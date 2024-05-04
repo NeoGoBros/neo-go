@@ -66,7 +66,7 @@ func writeCoverageReport(w io.Writer) {
 				c = 1
 			}
 			fmt.Fprintf(w, "%s:%d.%d,%d.%d %d %d\n", name,
-				b.startLine, b.endLine,
+				b.startLine, b.startCol,
 				b.endLine, b.endCol,
 				b.stmts,
 				c,

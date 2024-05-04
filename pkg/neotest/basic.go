@@ -29,27 +29,24 @@ import (
 
 // Executor is a wrapper over chain state.
 type Executor struct {
-	Chain             *core.Blockchain
-	Validator         Signer
-	Committee         Signer
-	CommitteeHash     util.Uint160
-	Contracts         map[string]*Contract
-	CoverageCollector *CoverageCollector
+	Chain         *core.Blockchain
+	Validator     Signer
+	Committee     Signer
+	CommitteeHash util.Uint160
+	Contracts     map[string]*Contract
 }
 
 // NewExecutor creates a new executor instance from the provided blockchain and committee.
-// If coverageCollector is not nil, it will be used to collect test coverage.
-func NewExecutor(t testing.TB, bc *core.Blockchain, validator, committee Signer, coverageCollector *CoverageCollector) *Executor {
+func NewExecutor(t testing.TB, bc *core.Blockchain, validator, committee Signer) *Executor {
 	checkMultiSigner(t, validator)
 	checkMultiSigner(t, committee)
 
 	return &Executor{
-		Chain:             bc,
-		Validator:         validator,
-		Committee:         committee,
-		CommitteeHash:     committee.ScriptHash(),
-		Contracts:         make(map[string]*Contract),
-		CoverageCollector: coverageCollector,
+		Chain:         bc,
+		Validator:     validator,
+		Committee:     committee,
+		CommitteeHash: committee.ScriptHash(),
+		Contracts:     make(map[string]*Contract),
 	}
 }
 
@@ -110,7 +107,7 @@ func (e *Executor) SignTx(t testing.TB, tx *transaction.Transaction, sysFee int6
 		})
 	}
 	AddNetworkFee(t, e.Chain, tx, signers...)
-	e.AddSystemFee(e.Chain, tx, sysFee)
+	AddSystemFee(e.Chain, tx, sysFee)
 
 	for _, acc := range signers {
 		require.NoError(t, acc.SignTx(e.Chain.GetConfig().Magic, tx))
@@ -290,12 +287,12 @@ func NewDeployTxBy(t testing.TB, bc *core.Blockchain, signer Signer, c *Contract
 
 // AddSystemFee adds system fee to the transaction. If negative value specified,
 // then system fee is defined by test invocation.
-func (e *Executor) AddSystemFee(bc *core.Blockchain, tx *transaction.Transaction, sysFee int64) {
+func AddSystemFee(bc *core.Blockchain, tx *transaction.Transaction, sysFee int64) {
 	if sysFee >= 0 {
 		tx.SystemFee = sysFee
 		return
 	}
-	v, _ := e.TestInvoke(bc, tx) // ignore error to support failing transactions
+	v, _ := TestInvoke(bc, tx) // ignore error to support failing transactions
 	tx.SystemFee = v.GasConsumed()
 }
 
@@ -387,7 +384,7 @@ func (e *Executor) AddBlockCheckHalt(t testing.TB, txs ...*transaction.Transacti
 }
 
 // TestInvoke creates a test VM with a dummy block and executes a transaction in it.
-func (e *Executor) TestInvoke(bc *core.Blockchain, tx *transaction.Transaction) (*vm.VM, error) {
+func TestInvoke(bc *core.Blockchain, tx *transaction.Transaction) (*vm.VM, error) {
 	lastBlock, err := bc.GetBlock(bc.GetHeaderHash(bc.BlockHeight()))
 	if err != nil {
 		return nil, err
@@ -403,10 +400,6 @@ func (e *Executor) TestInvoke(bc *core.Blockchain, tx *transaction.Transaction) 
 	// This is unwanted behavior, so we explicitly copy the transaction to perform execution.
 	ttx := *tx
 	ic, _ := bc.GetTestVM(trigger.Application, &ttx, b)
-	if e.CoverageCollector != nil {
-		hook := e.CoverageCollector.GetOnExecHook()
-		ic.VM.SetOnExecHook(hook)
-	}
 
 	defer ic.Finalize()
 

@@ -16,10 +16,9 @@ import (
 
 // Contract contains contract info for deployment.
 type Contract struct {
-	Hash      util.Uint160
-	NEF       *nef.File
-	Manifest  *manifest.Manifest
-	DebugInfo *compiler.DebugInfo
+	Hash     util.Uint160
+	NEF      *nef.File
+	Manifest *manifest.Manifest
 }
 
 // contracts caches the compiled contracts from FS across multiple tests.
@@ -37,10 +36,9 @@ func CompileSource(t testing.TB, sender util.Uint160, src io.Reader, opts *compi
 	require.NoError(t, err)
 
 	return &Contract{
-		Hash:      state.CreateContractHash(sender, ne.Checksum, m.Name),
-		NEF:       ne,
-		Manifest:  m,
-		DebugInfo: di,
+		Hash:     state.CreateContractHash(sender, ne.Checksum, m.Name),
+		NEF:      ne,
+		Manifest: m,
 	}
 }
 
@@ -75,10 +73,9 @@ func CompileFile(t testing.TB, sender util.Uint160, srcPath string, configPath s
 	require.NoError(t, err)
 
 	c := &Contract{
-		Hash:      state.CreateContractHash(sender, ne.Checksum, m.Name),
-		NEF:       ne,
-		Manifest:  m,
-		DebugInfo: di,
+		Hash:     state.CreateContractHash(sender, ne.Checksum, m.Name),
+		NEF:      ne,
+		Manifest: m,
 	}
 	contracts[srcPath] = c
 	return c

@@ -22,11 +22,10 @@ import (
 
 // DebugInfo represents smart-contract debug information.
 type DebugInfo struct {
-	MainPkg      string `json:"-"`
-	MainDocument string
-	Hash         util.Uint160      `json:"hash"`
-	Documents    []string          `json:"documents"`
-	Methods      []MethodDebugInfo `json:"methods"`
+	MainPkg   string            `json:"-"`
+	Hash      util.Uint160      `json:"hash"`
+	Documents []string          `json:"documents"`
+	Methods   []MethodDebugInfo `json:"methods"`
 	// NamedTypes are exported structured types that have some name (even
 	// if the original structure doesn't) and a number of internal fields.
 	NamedTypes map[string]binding.ExtendedType `json:"-"`
@@ -151,7 +150,6 @@ func (c *codegen) emitDebugInfo(contract []byte) *DebugInfo {
 		MainPkg:         c.mainPkg.Name,
 		Events:          []EventDebugInfo{},
 		Documents:       c.documents,
-		MainDocument:    c.documents[len(c.documents)-1],
 		StaticVariables: c.staticVariables,
 	}
 	if c.initEndOffset > 0 {

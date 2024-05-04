@@ -51,8 +51,8 @@ func coverageHook() vm.OnExecHook {
 }
 
 func reportCoverage() {
-	f, _ := os.Create("cover.out")
-	fmt.Fprintf(f, "mode: set\n")
+	f, _ := os.Create("cover.out") // TODO: save in gocoverdir 
+	fmt.Fprintf(f, "mode: set\n") // TODO: other mods?
 	defer f.Close()
 	writeCoverageReport(f)
 }
@@ -84,10 +84,11 @@ func processCover() map[documentName][]coverBlock {
 	}
 
 	cover := make(map[documentName][]coverBlock)
+
 	for documentName := range documents {
 		mappedBlocks := make(map[int]*coverBlock)
-		for _, scriptRawCoverage := range rawCoverage {
 
+		for _, scriptRawCoverage := range rawCoverage {
 			di := scriptRawCoverage.debugInfo
 			documentSeqPoints := documentSeqPoints(di, documentName)
 
@@ -103,9 +104,9 @@ func processCover() map[documentName][]coverBlock {
 				mappedBlocks[point.Opcode] = &b
 			}
 		}
+
 		for _, scriptRawCoverage := range rawCoverage {
 			di := scriptRawCoverage.debugInfo
-
 			documentSeqPoints := documentSeqPoints(di, documentName)
 
 			for _, offset := range scriptRawCoverage.offsetsVisited {
@@ -123,6 +124,7 @@ func processCover() map[documentName][]coverBlock {
 		}
 		cover[documentName] = blocks
 	}
+
 	return cover
 }
 

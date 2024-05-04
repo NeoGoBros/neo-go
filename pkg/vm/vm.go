@@ -502,7 +502,7 @@ func (v *VM) Step() error {
 func (v *VM) step(ctx *Context) error {
 	instruction_offset := v.Context().nextip
 	op, param, err := ctx.Next()
-	v.hooks.onExec(v.GetCurrentScriptHash(), instruction_offset, op)
+	v.hooks.onExec(ctx.ScriptHash(), instruction_offset, op)
 	if err != nil {
 		v.state = vmstate.Fault
 		return newError(ctx.ip, op, err)

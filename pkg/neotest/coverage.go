@@ -43,8 +43,8 @@ func isCoverageEnabled() bool {
 }
 
 func coverageHook() vm.OnExecHook {
-	return func(scriptHash util.Uint160, offset int, opcode opcode.Opcode) {
-		if cov, ok := rawCoverage[scriptHash]; ok {
+	return func(sh scriptHash, offset int, opcode opcode.Opcode) {
+		if cov, ok := rawCoverage[sh]; ok {
 			cov.offsetsVisited = append(cov.offsetsVisited, offset)
 		}
 	}

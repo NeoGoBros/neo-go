@@ -40,7 +40,13 @@ func CompileSource(t testing.TB, sender util.Uint160, src io.Reader, opts *compi
 		NEF:      ne,
 		Manifest: m,
 	}
-	coverage[c.Hash] = &scriptCoverage{debugInfo: di}
+
+	if isCoverageEnabled() {
+		rawCoverage[c.Hash] = &scriptRawCoverage{debugInfo: di}
+		t.Cleanup(func() {
+			reportCoverage()
+		})
+	}
 
 	return &c
 }
@@ -80,7 +86,14 @@ func CompileFile(t testing.TB, sender util.Uint160, srcPath string, configPath s
 		NEF:      ne,
 		Manifest: m,
 	}
-	coverage[c.Hash] = &scriptCoverage{debugInfo: di}
+
+	if isCoverageEnabled() {
+		rawCoverage[c.Hash] = &scriptRawCoverage{debugInfo: di}
+		t.Cleanup(func() {
+			reportCoverage()
+		})
+	}
+
 	contracts[srcPath] = c
 	return c
 }

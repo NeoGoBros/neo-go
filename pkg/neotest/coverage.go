@@ -29,10 +29,6 @@ type coverBlock struct {
 
 type documentName = string
 
-type documentCover struct {
-	blocks []coverBlock
-}
-
 func isCoverageEnabled() bool {
 	enabled := true // TODO: = false
 	flag.VisitAll(func(f *flag.Flag) {
@@ -52,34 +48,66 @@ func coverageHook() vm.OnExecHook {
 }
 
 func reportCoverage() {
+
+	documents := make(map[documentName]struct{})
 	for _, scriptRawCoverage := range rawCoverage {
-
-		di := scriptRawCoverage.debugInfo
-
-		var scriptSeqPoints []compiler.DebugSeqPoint
-		for _, methodDebugInfo := range di.Methods {
-			scriptSeqPoints = append(scriptSeqPoints, methodDebugInfo.SeqPoints...)
+		for _, documentName := range scriptRawCoverage.debugInfo.Documents {
+			documents[documentName] = struct{}{}
 		}
+	}
 
-		blocks := make(map[int]*coverBlock)
-		for _, point := range scriptSeqPoints {
-			b := coverBlock{
-				startLine: uint(point.StartLine),
-				startCol: uint(point.StartCol),
-				endLine: uint(point.EndLine),
-				endCol: uint(point.EndCol),
-				stmts: 1 + uint(point.EndLine) - uint(point.StartLine),
-				counts: 0,
+	cover := make(map[documentName][]coverBlock)
+	for documentName := range documents {
+		mappedBlocks := make(map[int]*coverBlock)
+		for _, scriptRawCoverage := range rawCoverage {
+
+			di := scriptRawCoverage.debugInfo
+			documentSeqPoints := documentSeqPoints(di, documentName)
+
+			for _, point := range documentSeqPoints {
+				b := coverBlock{
+					startLine: uint(point.StartLine),
+					startCol: uint(point.StartCol),
+					endLine: uint(point.EndLine),
+					endCol: uint(point.EndCol),
+					stmts: 1 + uint(point.EndLine) - uint(point.StartLine),
+					counts: 0,
+				}
+				mappedBlocks[point.Opcode] = &b
 			}
-			blocks[point.Opcode] = &b
 		}
+		for _, scriptRawCoverage := range rawCoverage {
+			di := scriptRawCoverage.debugInfo
 
-		for _, offset := range scriptRawCoverage.offsetsVisited {
-			for _, point := range scriptSeqPoints {
-				if point.Opcode == offset {
-					blocks[point.Opcode].counts++
+			documentSeqPoints := documentSeqPoints(di, documentName)
+
+			for _, offset := range scriptRawCoverage.offsetsVisited {
+				for _, point := range documentSeqPoints {
+					if point.Opcode == offset {
+						mappedBlocks[point.Opcode].counts++
+					}
 				}
 			}
 		}
+		
+		var blocks []coverBlock
+		for _, b := range mappedBlocks {
+			blocks = append(blocks, *b)
+		}
+		cover[documentName] = blocks
 	}
+
+	println(cover)
+}
+
+func documentSeqPoints(di *compiler.DebugInfo, doc documentName) []compiler.DebugSeqPoint {
+	var res []compiler.DebugSeqPoint
+	for _, methodDebugInfo := range di.Methods {
+		for _, p := range methodDebugInfo.SeqPoints {
+			if (di.Documents[p.Document] == doc) {
+				res = append(res, p)	
+			}
+		}
+	}
+	return res
 }

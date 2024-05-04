@@ -52,7 +52,7 @@ func coverageHook() vm.OnExecHook {
 
 func reportCoverage() {
 	f, _ := os.Create("cover.out")
-	fmt.Fprintf(f, "mode: count\n")
+	fmt.Fprintf(f, "mode: set\n")
 	defer f.Close()
 	writeCoverageReport(f)
 }
@@ -61,11 +61,15 @@ func writeCoverageReport(w io.Writer) {
 	cover := processCover()
 	for name, blocks := range cover {
 		for _, b := range blocks {
+			c := 0
+			if b.counts > 0 {
+				c = 1
+			}
 			fmt.Fprintf(w, "%s:%d.%d,%d.%d %d %d\n", name,
 				b.startLine, b.endLine,
 				b.endLine, b.endCol,
 				b.stmts,
-				b.counts,
+				c,
 			)
 		}
 	}

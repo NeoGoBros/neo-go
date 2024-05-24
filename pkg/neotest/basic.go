@@ -401,6 +401,10 @@ func (e *Executor) TestInvoke(tx *transaction.Transaction) (*vm.VM, error) {
 	ttx := *tx
 	ic, _ := e.Chain.GetTestVM(trigger.Application, &ttx, b)
 
+	if isCoverageEnabled() {
+		ic.VM.SetOnExecHook(coverageHook())
+	}
+
 	defer ic.Finalize()
 
 	ic.VM.LoadWithFlags(tx.Script, callflag.All)

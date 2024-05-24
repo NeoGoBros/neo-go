@@ -14,6 +14,9 @@ import (
 
 var rawCoverage = make(map[scriptHash]*scriptRawCoverage)
 
+var enabled = false
+var coverProfile = ""
+
 type scriptHash = util.Uint160
 
 type scriptRawCoverage struct {
@@ -33,12 +36,21 @@ type coverBlock struct {
 type documentName = string
 
 func isCoverageEnabled() bool {
-	enabled := true // TODO: = false
+	if enabled {
+		return true
+	}
+	const coverProfileFlag = "test.coverprofile"
 	flag.VisitAll(func(f *flag.Flag) {
-		if f.Name == "test.gocoverdir" && f.Value != nil {
+		if f.Name == coverProfileFlag && f.Value != nil {
 			enabled = true
+			coverProfile = f.Value.String()
 		}
 	})
+	if enabled {
+		// this is needed so go cover tool doesn't overwrite
+		// the file with our coverage when all tests are done
+		flag.Set(coverProfileFlag, "") 
+	}
 	return enabled
 }
 
@@ -51,13 +63,13 @@ func coverageHook() vm.OnExecHook {
 }
 
 func reportCoverage() {
-	f, _ := os.Create("cover.out") // TODO: save in gocoverdir 
-	fmt.Fprintf(f, "mode: set\n") // TODO: other mods?
+	f, _ := os.Create(coverProfile)
 	defer f.Close()
 	writeCoverageReport(f)
 }
 
 func writeCoverageReport(w io.Writer) {
+	fmt.Fprintf(w, "mode: set\n") // TODO: other mods
 	cover := processCover()
 	for name, blocks := range cover {
 		for _, b := range blocks {

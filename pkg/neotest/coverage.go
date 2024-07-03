@@ -47,7 +47,10 @@ func isCoverageEnabled() bool {
 	if enabled {
 		// this is needed so go cover tool doesn't overwrite
 		// the file with our coverage when all tests are done
-		flag.Set(coverProfileFlag, "")
+		err := flag.Set(coverProfileFlag, "")
+		if err != nil {
+			panic(err)
+		}
 	}
 	return enabled
 }

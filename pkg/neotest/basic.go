@@ -28,11 +28,12 @@ import (
 
 // Executor is a wrapper over chain state.
 type Executor struct {
-	Chain         *core.Blockchain
-	Validator     Signer
-	Committee     Signer
-	CommitteeHash util.Uint160
-	Contracts     map[string]*Contract
+	Chain           *core.Blockchain
+	Validator       Signer
+	Committee       Signer
+	CommitteeHash   util.Uint160
+	Contracts       map[string]*Contract
+	collectCoverage bool
 }
 
 // NewExecutor creates a new executor instance from the provided blockchain and committee.
@@ -41,11 +42,12 @@ func NewExecutor(t testing.TB, bc *core.Blockchain, validator, committee Signer)
 	checkMultiSigner(t, committee)
 
 	return &Executor{
-		Chain:         bc,
-		Validator:     validator,
-		Committee:     committee,
-		CommitteeHash: committee.ScriptHash(),
-		Contracts:     make(map[string]*Contract),
+		Chain:           bc,
+		Validator:       validator,
+		Committee:       committee,
+		CommitteeHash:   committee.ScriptHash(),
+		Contracts:       make(map[string]*Contract),
+		collectCoverage: isCoverageEnabled(),
 	}
 }
 
@@ -434,4 +436,12 @@ func (e *Executor) GetTxExecResult(t testing.TB, h util.Uint256) *state.AppExecR
 	require.NoError(t, err)
 	require.Equal(t, 1, len(aer))
 	return &aer[0]
+}
+
+func (e *Executor) EnableCoverage() {
+	e.collectCoverage = isCoverageEnabled()
+}
+
+func (e *Executor) DisableCoverage() {
+	e.collectCoverage = false
 }

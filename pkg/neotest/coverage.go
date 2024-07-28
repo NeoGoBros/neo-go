@@ -14,6 +14,7 @@ import (
 
 var rawCoverage = make(map[util.Uint160]*scriptRawCoverage)
 
+var checked bool
 var enabled bool
 var coverProfile = ""
 
@@ -34,9 +35,11 @@ type coverBlock struct {
 type documentName = string
 
 func isCoverageEnabled() bool {
-	if enabled {
-		return true
+	if checked {
+		return enabled
 	}
+	defer func() { checked = true }()
+
 	const coverProfileFlag = "test.coverprofile"
 	flag.VisitAll(func(f *flag.Flag) {
 		if f.Name == coverProfileFlag && f.Value != nil {
@@ -44,6 +47,7 @@ func isCoverageEnabled() bool {
 			coverProfile = f.Value.String()
 		}
 	})
+
 	if enabled {
 		// this is needed so go cover tool doesn't overwrite
 		// the file with our coverage when all tests are done

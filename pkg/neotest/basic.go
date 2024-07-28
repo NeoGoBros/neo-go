@@ -161,6 +161,15 @@ func (e *Executor) DeployContractBy(t testing.TB, signer Signer, c *Contract, da
 		}),
 	})
 
+	if e.collectCoverage {
+		if _, ok := rawCoverage[c.Hash]; !ok {
+			rawCoverage[c.Hash] = &scriptRawCoverage{debugInfo: c.DebugInfo}
+		}
+		t.Cleanup(func() {
+			reportCoverage()
+		})
+	}
+
 	return tx.Hash()
 }
 

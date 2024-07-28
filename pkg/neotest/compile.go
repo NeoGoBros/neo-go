@@ -36,22 +36,17 @@ func CompileSource(t testing.TB, sender util.Uint160, src io.Reader, opts *compi
 	m, err := compiler.CreateManifest(di, opts)
 	require.NoError(t, err)
 
-	c := Contract{
+	return &Contract{
 		Hash:      state.CreateContractHash(sender, ne.Checksum, m.Name),
 		NEF:       ne,
 		Manifest:  m,
 		DebugInfo: di,
 	}
-
-	collectCoverage(t, di, c.Hash)
-
-	return &c
 }
 
 // CompileFile compiles a contract from the file and returns its NEF, manifest and hash.
 func CompileFile(t testing.TB, sender util.Uint160, srcPath string, configPath string) *Contract {
 	if c, ok := contracts[srcPath]; ok {
-		collectCoverage(t, rawCoverage[c.Hash].debugInfo, c.Hash)
 		return c
 	}
 
@@ -85,20 +80,6 @@ func CompileFile(t testing.TB, sender util.Uint160, srcPath string, configPath s
 		Manifest:  m,
 		DebugInfo: di,
 	}
-
-	collectCoverage(t, di, c.Hash)
-
 	contracts[srcPath] = c
 	return c
-}
-
-func collectCoverage(t testing.TB, di *compiler.DebugInfo, h util.Uint160) {
-	if isCoverageEnabled() {
-		if _, ok := rawCoverage[h]; !ok {
-			rawCoverage[h] = &scriptRawCoverage{debugInfo: di}
-		}
-		t.Cleanup(func() {
-			reportCoverage()
-		})
-	}
 }

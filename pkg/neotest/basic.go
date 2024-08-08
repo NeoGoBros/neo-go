@@ -166,7 +166,7 @@ func (e *Executor) DeployContractBy(t testing.TB, signer Signer, c *Contract, da
 			rawCoverage[c.Hash] = &scriptRawCoverage{debugInfo: c.DebugInfo}
 		}
 		t.Cleanup(func() {
-			reportCoverage()
+			reportCoverage(t)
 		})
 	}
 

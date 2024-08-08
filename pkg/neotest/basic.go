@@ -413,7 +413,7 @@ func (e *Executor) TestInvoke(tx *transaction.Transaction) (*vm.VM, error) {
 	ic, _ := e.Chain.GetTestVM(trigger.Application, &ttx, b)
 
 	if isCoverageEnabled() {
-		ic.VM.SetOnExecHook(coverageHook())
+		ic.VM.SetOnExecHook(coverageHook)
 	}
 
 	defer ic.Finalize()

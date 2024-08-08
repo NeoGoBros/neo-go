@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"testing"
 
 	"github.com/nspcc-dev/neo-go/pkg/compiler"
 	"github.com/nspcc-dev/neo-go/pkg/util"
@@ -32,15 +33,15 @@ type coverBlock struct {
 	// Line number for block start.
 	startLine uint
 	// Column number for block start.
-	startCol  uint
+	startCol uint
 	// Line number for block end.
-	endLine   uint
+	endLine uint
 	// Column number for block end.
-	endCol    uint
+	endCol uint
 	// Number of statements included in this block.
-	stmts     uint
+	stmts uint
 	// Number of times this block was executed.
-	counts    uint
+	counts uint
 }
 
 type documentName = string
@@ -76,10 +77,10 @@ var coverageHook vm.OnExecHook = func(scriptHash util.Uint160, offset int, opcod
 	}
 }
 
-func reportCoverage() {
+func reportCoverage(t testing.TB) {
 	f, err := os.Create(coverProfile)
 	if err != nil {
-		panic(fmt.Sprintf("coverage: can't create file '%s' to write coverage report", coverProfile))
+		t.Fatalf("coverage: can't create file '%s' to write coverage report", coverProfile)
 	}
 	defer f.Close()
 	writeCoverageReport(f)

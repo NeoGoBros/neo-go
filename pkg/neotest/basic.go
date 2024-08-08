@@ -447,10 +447,12 @@ func (e *Executor) GetTxExecResult(t testing.TB, h util.Uint256) *state.AppExecR
 	return &aer[0]
 }
 
+// EnableCoverage enables coverage collection for this executor, but only when `go test` is running with coverage enabled.
 func (e *Executor) EnableCoverage() {
 	e.collectCoverage = isCoverageEnabled()
 }
 
+// DisableCoverage disables coverage collection for this executor until enabled explicitly through EnableCoverage.
 func (e *Executor) DisableCoverage() {
 	e.collectCoverage = false
 }

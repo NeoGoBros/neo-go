@@ -147,6 +147,7 @@ func (e *Executor) DeployContract(t testing.TB, c *Contract, data any) util.Uint
 // data is an optional argument to `_deploy`.
 // It returns the hash of the deploy transaction.
 func (e *Executor) DeployContractBy(t testing.TB, signer Signer, c *Contract, data any) util.Uint256 {
+	e.trackCoverage(t, c)
 	tx := e.NewDeployTxBy(t, signer, c, data)
 	e.AddNewBlock(t, tx)
 	e.CheckHalt(t, tx.Hash())
@@ -159,7 +160,20 @@ func (e *Executor) DeployContractBy(t testing.TB, signer Signer, c *Contract, da
 			stackitem.NewByteArray(c.Hash.BytesBE()),
 		}),
 	})
+	return tx.Hash()
+}
 
+// DeployContractCheckFAULT compiles and deploys a contract to the bc using the validator
+// account. It checks that the deploy transaction FAULTed with the specified error.
+func (e *Executor) DeployContractCheckFAULT(t testing.TB, c *Contract, data any, errMessage string) {
+	e.trackCoverage(t, c)
+	tx := e.NewDeployTx(t, c, data)
+	e.AddNewBlock(t, tx)
+	e.CheckFault(t, tx.Hash(), errMessage)
+}
+
+// This switches on coverage tracking for provided script if `go test` is running with coverage enabled.
+func (e *Executor) trackCoverage(t testing.TB, c *Contract) {
 	if e.collectCoverage {
 		if _, ok := rawCoverage[c.Hash]; !ok {
 			rawCoverage[c.Hash] = &scriptRawCoverage{debugInfo: c.DebugInfo}
@@ -168,16 +182,6 @@ func (e *Executor) DeployContractBy(t testing.TB, signer Signer, c *Contract, da
 			reportCoverage(t)
 		})
 	}
-
-	return tx.Hash()
-}
-
-// DeployContractCheckFAULT compiles and deploys a contract to the bc using the validator
-// account. It checks that the deploy transaction FAULTed with the specified error.
-func (e *Executor) DeployContractCheckFAULT(t testing.TB, c *Contract, data any, errMessage string) {
-	tx := e.NewDeployTx(t, c, data)
-	e.AddNewBlock(t, tx)
-	e.CheckFault(t, tx.Hash(), errMessage)
 }
 
 // InvokeScript adds a transaction with the specified script to the chain and

@@ -14,9 +14,14 @@ import (
 
 var rawCoverage = make(map[util.Uint160]*scriptRawCoverage)
 
-var checked bool
-var enabled bool
-var coverProfile = ""
+var (
+	// True if `go test` coverage flag was checked at any point.
+	flagChecked bool
+	// True if coverage is being collected on test execution.
+	coverageEnabled bool
+	// File where all coverage data is written to, unless empty.
+	coverProfile = ""
+)
 
 type scriptRawCoverage struct {
 	debugInfo      *compiler.DebugInfo
@@ -24,39 +29,45 @@ type scriptRawCoverage struct {
 }
 
 type coverBlock struct {
-	startLine uint // Line number for block start.
-	startCol  uint // Column number for block start.
-	endLine   uint // Line number for block end.
-	endCol    uint // Column number for block end.
-	stmts     uint // Number of statements included in this block.
+	// Line number for block start.
+	startLine uint
+	// Column number for block start.
+	startCol  uint
+	// Line number for block end.
+	endLine   uint
+	// Column number for block end.
+	endCol    uint
+	// Number of statements included in this block.
+	stmts     uint
+	// Number of times this block was executed.
 	counts    uint
 }
 
 type documentName = string
 
 func isCoverageEnabled() bool {
-	if checked {
-		return enabled
+	if flagChecked {
+		return coverageEnabled
 	}
-	defer func() { checked = true }()
+	defer func() { flagChecked = true }()
 
 	const coverProfileFlag = "test.coverprofile"
 	flag.VisitAll(func(f *flag.Flag) {
 		if f.Name == coverProfileFlag && f.Value != nil {
-			enabled = true
+			coverageEnabled = true
 			coverProfile = f.Value.String()
 		}
 	})
 
-	if enabled {
-		// this is needed so go cover tool doesn't overwrite
-		// the file with our coverage when all tests are done
+	if coverageEnabled {
+		// This is needed so go cover tool doesn't overwrite
+		// the file with our coverage when all tests are done.
 		err := flag.Set(coverProfileFlag, "")
 		if err != nil {
 			panic(err)
 		}
 	}
-	return enabled
+	return coverageEnabled
 }
 
 var coverageHook vm.OnExecHook = func(scriptHash util.Uint160, offset int, opcode opcode.Opcode) {

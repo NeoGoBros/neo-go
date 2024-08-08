@@ -44,6 +44,7 @@ type coverBlock struct {
 	counts uint
 }
 
+// This type makes it clear when a `string` maps path to the script file
 type documentName = string
 
 func isCoverageEnabled() bool {

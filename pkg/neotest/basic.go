@@ -415,7 +415,7 @@ func (e *Executor) TestInvoke(tx *transaction.Transaction) (*vm.VM, error) {
 	ttx := *tx
 	ic, _ := e.Chain.GetTestVM(trigger.Application, &ttx, b)
 
-	if isCoverageEnabled() {
+	if e.collectCoverage {
 		ic.VM.SetOnExecHook(coverageHook)
 	}
 

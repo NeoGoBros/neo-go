@@ -21,5 +21,11 @@ them in the same package with the smart contract iself can lead to unxpected
 results if smart contract has any init() functions. If that's the case they
 will be compiled into the testing binary even when using package_test and their
 execution can affect tests. See https://github.com/nspcc-dev/neo-go/issues/3120 for details.
+
+Test coverage for contracts works as expected and is automatically enabled when
+`go test` is running with coverage enabled. When not desired, it can be disabled
+for any Executor by using relevant methods. Be aware that coverage data collected by
+`go test` itself will not be saved because it will be replaced with coverage data
+for contracts instead.
 */
 package neotest

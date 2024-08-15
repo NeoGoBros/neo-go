@@ -32,7 +32,6 @@ type Executor struct {
 	Validator       Signer
 	Committee       Signer
 	CommitteeHash   util.Uint160
-	Contracts       map[string]*Contract
 	collectCoverage bool
 }
 
@@ -46,7 +45,6 @@ func NewExecutor(t testing.TB, bc *core.Blockchain, validator, committee Signer)
 		Validator:       validator,
 		Committee:       committee,
 		CommitteeHash:   committee.ScriptHash(),
-		Contracts:       make(map[string]*Contract),
 		collectCoverage: isCoverageEnabled(),
 	}
 }

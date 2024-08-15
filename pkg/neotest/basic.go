@@ -32,10 +32,13 @@ type Executor struct {
 	Validator       Signer
 	Committee       Signer
 	CommitteeHash   util.Uint160
+	// collectCoverage is true if coverage is being collected when running this executor.
 	collectCoverage bool
 }
 
 // NewExecutor creates a new executor instance from the provided blockchain and committee.
+// By default coverage collection is enabled, but only when `go test` is running with coverage enabled.
+// Use DisableCoverage and EnableCoverage to stop coverage collection for this executor when not desired.
 func NewExecutor(t testing.TB, bc *core.Blockchain, validator, committee Signer) *Executor {
 	checkMultiSigner(t, validator)
 	checkMultiSigner(t, committee)

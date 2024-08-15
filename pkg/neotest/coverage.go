@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/nspcc-dev/neo-go/pkg/compiler"
@@ -13,9 +14,10 @@ import (
 	"github.com/nspcc-dev/neo-go/pkg/vm/opcode"
 )
 
-var rawCoverage = make(map[util.Uint160]*scriptRawCoverage)
-
 var (
+	coverageLock sync.Mutex
+	// rawCoverage maps script hash to coverage data, collected during testing.
+	rawCoverage = make(map[util.Uint160]*scriptRawCoverage)
 	// flagChecked is true if `go test` coverage flag was checked at any point.
 	flagChecked bool
 	// coverageEnabled is true if coverage is being collected on test execution.
@@ -48,6 +50,9 @@ type coverBlock struct {
 type documentName = string
 
 func isCoverageEnabled() bool {
+	coverageLock.Lock()
+	defer coverageLock.Unlock()
+
 	if flagChecked {
 		return coverageEnabled
 	}
@@ -73,12 +78,16 @@ func isCoverageEnabled() bool {
 }
 
 var coverageHook vm.OnExecHook = func(scriptHash util.Uint160, offset int, opcode opcode.Opcode) {
+	coverageLock.Lock()
+	defer coverageLock.Unlock()
 	if cov, ok := rawCoverage[scriptHash]; ok {
 		cov.offsetsVisited = append(cov.offsetsVisited, offset)
 	}
 }
 
 func reportCoverage(t testing.TB) {
+	coverageLock.Lock()
+	defer coverageLock.Unlock()
 	f, err := os.Create(coverProfile)
 	if err != nil {
 		t.Fatalf("coverage: can't create file '%s' to write coverage report", coverProfile)
@@ -169,4 +178,12 @@ func documentSeqPoints(di *compiler.DebugInfo, doc documentName) []compiler.Debu
 		}
 	}
 	return res
+}
+
+func addScriptToCoverage(c *Contract) {
+	coverageLock.Lock()
+	defer coverageLock.Unlock()
+	if _, ok := rawCoverage[c.Hash]; !ok {
+		rawCoverage[c.Hash] = &scriptRawCoverage{debugInfo: c.DebugInfo}
+	}
 }

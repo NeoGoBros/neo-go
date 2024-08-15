@@ -15,6 +15,7 @@ import (
 )
 
 var (
+	// coverageLock protects all vars below from concurrent modification when tests are run in parallel.
 	coverageLock sync.Mutex
 	// rawCoverage maps script hash to coverage data, collected during testing.
 	rawCoverage = make(map[util.Uint160]*scriptRawCoverage)

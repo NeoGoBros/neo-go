@@ -16,11 +16,11 @@ import (
 var rawCoverage = make(map[util.Uint160]*scriptRawCoverage)
 
 var (
-	// True if `go test` coverage flag was checked at any point.
+	// flagChecked is true if `go test` coverage flag was checked at any point.
 	flagChecked bool
-	// True if coverage is being collected on test execution.
+	// coverageEnabled is true if coverage is being collected on test execution.
 	coverageEnabled bool
-	// File where all coverage data is written to, unless empty.
+	// coverProfile specifies the file all coverage data is written to, unless empty.
 	coverProfile = ""
 )
 
@@ -44,7 +44,7 @@ type coverBlock struct {
 	counts uint
 }
 
-// This type makes it clear when a `string` maps path to the script file
+// documentName makes it clear when a `string` maps path to the script file
 type documentName = string
 
 func isCoverageEnabled() bool {

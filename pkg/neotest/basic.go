@@ -160,6 +160,7 @@ func (e *Executor) DeployContractBy(t testing.TB, signer Signer, c *Contract, da
 			stackitem.NewByteArray(c.Hash.BytesBE()),
 		}),
 	})
+
 	return tx.Hash()
 }
 
